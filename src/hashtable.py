@@ -62,39 +62,61 @@ class HashTable:
         '''
 
         new_item = LinkedPair(key, value)
-        print(f'new_item: {new_item}')
-
         address = self._hash_mod(key)
+        
+        curr_node = self.storage[address]
+        prev_node = None
 
-        if self.storage[address] is None: 
-            self.storage[address] = new_item
+        while curr_node is not None and curr_node.key is not key:
+            prev_node = curr_node
+            curr_node = prev_node.next
+
+        if curr_node is not None:
+            curr_node.value = value
+
         else:
-            curr_node = self.storage[address]
-            prev_node = None
-            print(f'og curr_node: {curr_node}')
+            new_item.next = self.storage[address]
+            self.storage[address] = new_item
 
-            # if curr_node.key is key:
-            #     curr_node = new_item
-            #     print("match found")
-
-            while curr_node is not None:
-                print(f'curr_node: {curr_node}')
-                print('whiling')
-
-                if curr_node.key is key:
-                    prev_node = new_item
-                    print("match found")
-                    break
-                else: 
-                    prev_node = curr_node
-                    curr_node = curr_node.next
-
-            print(f'ult curr_node: {curr_node}')
-            print(f'ult prev_node: {prev_node}')
-            prev_node.next = new_item 
-
-        print(f'inserted: ({new_item.key}, {new_item.value})')
         print(self.storage)
+
+        # if curr_node is None: 
+        #     new_item.next = self.storage[address]
+        #     print(f'self.storage: {self.storage[ad]}')
+        #     print(f'curr_node was none: {new_item}')
+        #     self.storage[address] = new_item
+        # else:
+        #     curr_node.value = value
+        #     # curr_node = self.storage[address]
+        #     # prev_node = None
+        #     print(f'og curr_node: {curr_node}')
+
+        #     # if curr_node.key is key:
+        #     #     curr_node = new_item
+        #     #     print("match found")
+
+        #     while curr_node is not None and curr_node.key is not key:
+        #         print(f'while loop: curr_node: {curr_node}')
+
+        #         prev_node = curr_node
+        #         print(f'while loop: prev_node: {prev_node}')
+        #         curr_node = prev_node.next
+        #         print(f'while loop: curr_node: {curr_node}')
+
+        #         # if curr_node.key is key:
+        #         #     prev_node = new_item
+        #         #     print("match found")
+        #         #     break
+        #         # else: 
+        #         #     prev_node = curr_node
+        #         #     curr_node = curr_node.next
+
+        #     print(f'ult curr_node: {curr_node}')
+        #     print(f'ult prev_node: {prev_node}')
+        #     # prev_node.next = new_item 
+
+        # # print(f'inserted: ({new_item.key}, {new_item.value})')
+        # print(self.storage)
 
 
 
@@ -109,24 +131,41 @@ class HashTable:
       
         address = self._hash_mod(key)
 
-        if self.storage[address] is None:
-            print('Nothing here...')
-        else: 
-            curr_node = self.storage[address]
-            if curr_node.key is key:
-                self.storage[address] = None
+        curr_node = self.storage[address]
+        prev_node = None
+
+        while curr_node is not None and curr_node.key is not key:
+            prev_node = curr_node
+            curr_node = prev_node.next
+        
+        if curr_node is None:
+            print(f'Cannot find key')
+        else:
+            if prev_node is None:
+                self.storage[address] = curr_node.next
             else:
-                curr_node = self.storage[address]
-                prev_node = None
-                while curr_node.key is not key:
-                    prev_node = curr_node
-                    curr_node = curr_node.next
+                prev_node.next = curr_node.next
+
+        print(self.storage)
+
+        # if self.storage[address] is None:
+        #     print('Nothing here...')
+        # else: 
+        #     curr_node = self.storage[address]
+        #     if curr_node.key is key:
+        #         self.storage[address] = None
+        #     else:
+        #         curr_node = self.storage[address]
+        #         prev_node = None
+        #         while curr_node.key is not key:
+        #             prev_node = curr_node
+        #             curr_node = curr_node.next
                 
-                prev_node.next = None
+        #         prev_node.next = None
             
 
-        # print (f'removed: {self.storage[address]}')
-        print (self.storage)
+        # # print (f'removed: {self.storage[address]}')
+        # print (self.storage)
         
         # self.storage.remove(self.storage[address])
 
@@ -141,21 +180,30 @@ class HashTable:
 
         address = self._hash_mod(key)
 
-        if self.storage[address].key is key:
-            print(self.storage[address])
-            return self.storage[address]
-        else:
-            curr_node = self.storage[address]
-            # prev_node = None
+        curr_node = self.storage[address]
 
-            while curr_node.key is not key:
-                # prev_node = curr_node
-                curr_node = curr_node.next
+        while curr_node is not None: 
+            if curr_node.key is key:
+                print(curr_node.value)
+                return curr_node.value
+            curr_node = curr_node.next
 
-            print(f'found: {curr_node}')
+        # if self.storage[address].key is key:
+        #     print(self.storage[address])
+        #     return self.storage[address].value
+        # else:
+        #     curr_node = self.storage[address]
+        #     # prev_node = None
+
+        #     while curr_node.key is not key:
+        #         # prev_node = curr_node
+        #         curr_node = curr_node.next
+
+        #     print(f'found: {curr_node}')
         
-        # print(f'retrieved: {self.storage[address]}')
-        return self.storage[address]
+        # # print(f'retrieved: {self.storage[address]}')
+        # return self.storage[address].value
+        # # return self.storage[address]
 
 
 
@@ -166,25 +214,43 @@ class HashTable:
 
         Fill this in.
         '''
-        new_storage = [None] * self.capacity * 2
+        prev_storage = self.storage
 
-        for slot in self.storage:
-            new_storage.append(slot)
+        self.capacity *= 2
 
-        print(new_storage)
+        self.storage = [None] * self.capacity
+
+        curr_node = None
+
+        for slot in prev_storage:
+            curr_node = slot
+            while curr_node is not None:
+                self.insert(curr_node.key, curr_node.value)
+                curr_node = curr_node.next
+
+        print(self.storage)
+
+        # new_storage = [None] * self.capacity * 2
+
+        # for slot in self.storage:
+        #     new_storage.append(slot)
+
+        # print(new_storage)
 
 hashbrown = HashTable(5)
 hashbrown.insert(3, 10)
 # hashbrown.insert(3, 12)
 hashbrown.insert(8, 15)
-# hashbrown.insert(8, 20)
+hashbrown.insert(8, 20)
 hashbrown.insert(13, 20)
+# hashbrown.insert(8, 12)
 # hashbrown.insert(13, 3)
 # hashbrown.insert(8, 20)
 # hashbrown.insert(18, 90)
 # hashbrown.retrieve(3)
-hashbrown.retrieve(13)
-# hashbrown.remove(3)
+hashbrown.retrieve(3)
+hashbrown.remove(8)
+# hashbrown.resize()
 hashbrown.resize()
 
 
